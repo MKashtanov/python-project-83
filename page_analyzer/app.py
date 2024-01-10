@@ -1,11 +1,13 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
 
-@app.route('/', methods=['GET', 'POST'])
-def hello():
-    # Получить доступ к содержимому запроса можно через специальный объект request
-    if request.method == 'POST':
-        return 'Hello, POST!'
-    return 'Hello, GET!'
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/urls')
+def urls():
+    return render_template('urls.html')
