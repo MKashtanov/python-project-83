@@ -17,15 +17,15 @@ urls
       </tr>
       </thead>
       <tbody>
-      {% for url in urls %}
+      {% for url_item in url_items %}
       <tr>
-        <td>{{ url.id }}</td>
+        <td>{{ url_item.id }}</td>
         <td>
-          <a href="{{ url_for('url_view', id=url.id) }}">
-            {{ url.name }}
+          <a href="{{ url_for('url_view', id=url_item.id) }}">
+            {{ url_item.name }}
           </a>
         </td>
-        <td>Последняя проверка</td>
+        <td>{{ url_item.last_check|default('', true) }}</td>
         <td>Код ответа</td>
       </tr>
       {% endfor %}
