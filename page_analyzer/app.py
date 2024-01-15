@@ -85,12 +85,10 @@ def url_view(id):
 def url_check(id):
     result = False
     url_item = repo.find_one_url(id=id)
-    print('url_item =', url_item)
     if url_item:
         url = url_item.name
         result_check = check_url(url)
         if result_check['result']:
-            print('url =', url)
             result = repo.add_check(url, result_check)
     if result:
         flash('Страница успешно проверена', 'success')

@@ -15,8 +15,6 @@ class UrlsRepository:
             print('Connection to database is OK')
         except psycopg2.OperationalError as e:
             print(f'Unable to connect!\n{e}')
-            # sys.exit(1)
-            # print('Can`t establish connection to database')
 
     def __get_next_id(self, table):
         select_query = f'SELECT MAX(id) FROM {table};'
@@ -30,7 +28,8 @@ class UrlsRepository:
     def add_url(self, url):
         new_id = self.__get_next_id('urls')
         current_date = datetime.datetime.now()
-        insert_query = """INSERT INTO urls (id, name, created_at) VALUES (%s, %s, %s);"""
+        insert_query = """INSERT INTO urls (id, name, created_at)
+            VALUES (%s, %s, %s);"""
         item_tuple = (new_id, url, current_date)
 
         with self.conn.cursor() as curs:
@@ -61,7 +60,8 @@ class UrlsRepository:
 
     def get_all_url(self):
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            query ="""SELECT urls.id, urls.name, urls.created_at, max(url_checks.created_at) as last_check
+            query = """SELECT urls.id, urls.name, urls.created_at,
+                max(url_checks.created_at) as last_check
                 FROM urls LEFT JOIN url_checks on url_checks.url_id = urls.id
                 GROUP BY urls.id, urls.name, urls.created_at
                 ORDER BY urls.id DESC;"""
@@ -73,23 +73,21 @@ class UrlsRepository:
         new_id = self.__get_next_id('url_checks')
         current_date = datetime.datetime.now()
         url_id = self.find_one_url(name=url).id
-        insert_query = """INSERT INTO url_checks 
-            (id, url_id, status_code, h1, title, description, created_at) 
+        status_code = result_check['status_code']
+        h1 = result_check['h1']
+        title = result_check['title'][:110]
+        description = result_check['description'] \
+            if len(result_check['description']) <= 160 \
+            else f"{result_check['description'][:157]}..."
+        insert_query = """INSERT INTO url_checks
+            (id, url_id, status_code, h1, title, description, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s);"""
-        item_tuple = (
-            new_id,
-            url_id,
-            result_check['status_code'],
-            result_check['h1'],
-            result_check['title'],
-            result_check['description'],
-            current_date
-        )
+        item_tuple = (new_id, url_id, status_code,
+                      h1, title, description, current_date)
 
         with self.conn.cursor() as curs:
             curs.execute(insert_query, item_tuple)
         self.conn.commit()
-        print(f'проверка сайта {url} проведена.')
         return True
 
     def find_checks(self, id=None, url=None):
@@ -102,7 +100,7 @@ class UrlsRepository:
                 value = url_item.id
         if value:
             with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-                curs.execute(f"SELECT * from url_checks WHERE url_id=%s", (value,))
+                request = "SELECT * from url_checks WHERE url_id=%s"
+                curs.execute(request, (value,))
                 result = curs.fetchall()
         return result
-
