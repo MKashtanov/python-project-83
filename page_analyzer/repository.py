@@ -69,12 +69,22 @@ class UrlsRepository:
             result = curs.fetchall()
         return result
 
-    def add_check(self, url):
+    def add_check(self, url, result_check):
         new_id = self.__get_next_id('url_checks')
         current_date = datetime.datetime.now()
-        url_id = self.find_urls(name=url)[0].id
-        insert_query = """INSERT INTO url_checks (id, url_id, created_at) VALUES (%s, %s, %s);"""
-        item_tuple = (new_id, url_id, current_date)
+        url_id = self.find_one_url(name=url).id
+        insert_query = """INSERT INTO url_checks 
+            (id, url_id, status_code, h1, title, description, created_at) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s);"""
+        item_tuple = (
+            new_id,
+            url_id,
+            result_check['status_code'],
+            result_check['h1'],
+            result_check['title'],
+            result_check['description'],
+            current_date
+        )
 
         with self.conn.cursor() as curs:
             curs.execute(insert_query, item_tuple)
@@ -90,7 +100,6 @@ class UrlsRepository:
             url_item = self.find_one_url(name=url)
             if url_item:
                 value = url_item.id
-        print('value =', value)
         if value:
             with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
                 curs.execute(f"SELECT * from url_checks WHERE url_id=%s", (value,))
