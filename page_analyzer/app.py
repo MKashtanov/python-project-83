@@ -50,7 +50,7 @@ def add_url():
         repo.add_url(url)
         flash('Страница успешно добавлена', 'success')
     else:
-        flash('Страница уже существует', 'warning')
+        flash('Страница уже существует', 'info')
     return redirect(url_for('urls'))
 
 
