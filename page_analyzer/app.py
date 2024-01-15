@@ -36,11 +36,11 @@ def index():
 
 @app.post('/urls')
 def add_url():
-    messages = get_flashed_messages(with_categories=True)
     data = request.form.to_dict()
     error, url = validate(data.get('url'))
     if error:
         flash('Некорректный URL', 'danger')
+        messages = get_flashed_messages(with_categories=True)
         return render_template(
             'index.html',
             url=url,
