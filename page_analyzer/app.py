@@ -40,7 +40,7 @@ def add_url():
     data = request.form.to_dict()
     error, url = validate(data.get('url'))
     if error:
-        flash(f'Ошибка: {error}', 'danger')
+        flash('Некорректный URL', 'danger')
         return render_template(
             'index.html',
             url=url,
@@ -48,9 +48,9 @@ def add_url():
         ), 422
     if not repo.find_urls(name=url):
         repo.add_url(url)
-        flash(f'Добавлен новый сайт {url}', 'success')
+        flash('Страница успешно добавлена', 'success')
     else:
-        flash(f'Сайт уже присутствует {url}', 'warning')
+        flash('Страница уже существует', 'warning')
     return redirect(url_for('urls'))
 
 
