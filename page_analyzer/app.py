@@ -72,7 +72,7 @@ def url_view(id):
             checks=checks,
         )
     return render_template(
-           'not_found.html',
+        'not_found.html',
     ), 404
 
 
