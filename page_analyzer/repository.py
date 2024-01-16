@@ -66,9 +66,9 @@ class UrlsRepository:
         conn = self.__connect()
         with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             query = """SELECT urls.id, urls.name, urls.created_at,
-                max(url_checks.created_at) as last_check
+                max(url_checks.created_at) as last_check , url_checks.status_code
                 FROM urls LEFT JOIN url_checks on url_checks.url_id = urls.id
-                GROUP BY urls.id, urls.name, urls.created_at
+                GROUP BY urls.id, urls.name, urls.created_at, url_checks.status_code
                 ORDER BY urls.id DESC;"""
             curs.execute(query)
             result = curs.fetchall()
