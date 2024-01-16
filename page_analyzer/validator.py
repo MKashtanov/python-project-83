@@ -11,6 +11,7 @@ def validate(url):
         error = 'URL слишком длинный'
     return error
 
+
 def normalize_url(url):
     parsed_url = urlparse(url)
     scheme = parsed_url.scheme

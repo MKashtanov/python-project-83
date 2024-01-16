@@ -65,11 +65,12 @@ class UrlsRepository:
     def get_all_url(self):
         conn = self.__connect()
         with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            query = """SELECT urls.id, urls.name, urls.created_at,
-                max(url_checks.created_at) as last_check , url_checks.status_code
-                FROM urls LEFT JOIN url_checks on url_checks.url_id = urls.id
-                GROUP BY urls.id, urls.name, urls.created_at, url_checks.status_code
-                ORDER BY urls.id DESC;"""
+            query = """SELECT ur.id, ur.name, ur.created_at,
+                max(uc.created_at) as last_check , uc.status_code
+                FROM urls AS ur
+                LEFT JOIN url_checks AS uc on uc.url_id = ur.id
+                GROUP BY ur.id, ur.name, ur.created_at, uc.status_code
+                ORDER BY ur.id DESC;"""
             curs.execute(query)
             result = curs.fetchall()
         return result
