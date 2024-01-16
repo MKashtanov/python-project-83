@@ -6,12 +6,13 @@ def check_url(url):
     result = {'result': False}
     try:
         response = requests.get(url)
+        print('status_code =', response.status_code)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
-            title = soup.title.string
+            h1 = soup.h1.string if soup.h1 else None
+            title = soup.title.string if soup.title else None
             description = soup.find(
                 "meta", {"name": "description"}).get("content")
-            h1 = ""
 
             result.update({'result': True,
                            'status_code': response.status_code,

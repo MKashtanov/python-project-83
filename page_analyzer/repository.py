@@ -4,18 +4,23 @@ from psycopg2.extras import NamedTupleCursor
 
 
 class UrlsRepository:
-    conn = None
+    database_url = None
 
     def __init__(self, database_url):
+        self.database_url = database_url
+
+    def __connect(self):
         try:
-            self.conn = psycopg2.connect(database_url)
+            conn = psycopg2.connect(self.database_url)
             print('Connection to database is OK')
+            return conn
         except psycopg2.OperationalError as e:
             print(f'Unable to connect!\n{e}')
 
     def __get_next_id(self, table):
         select_query = f'SELECT MAX(id) FROM {table};'
-        with self.conn.cursor() as curs:
+        conn = self.__connect()
+        with conn.cursor() as curs:
             curs.execute(select_query)
             record = curs.fetchone()
         id = record[0]
@@ -29,11 +34,12 @@ class UrlsRepository:
             VALUES (%s, %s, %s);"""
         item_tuple = (new_id, url, current_date)
 
-        with self.conn.cursor() as curs:
+        conn = self.__connect()
+        with conn.cursor() as curs:
             curs.execute(insert_query, item_tuple)
-        self.conn.commit()
+        conn.commit()
         print(f'1 запись успешно вставлена. id={new_id}')
-        result = self.find_urls(name=url)
+        result = self.find_one_url(name=url)
         return result
 
     def find_urls(self, id=None, name=None):
@@ -44,7 +50,8 @@ class UrlsRepository:
         elif name:
             key, value = 'name', str(name)
         if key:
-            with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
+            conn = self.__connect()
+            with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
                 curs.execute(f"SELECT * from urls WHERE {key}=%s", (value,))
                 result = curs.fetchall()
         return result
@@ -56,7 +63,8 @@ class UrlsRepository:
         return result
 
     def get_all_url(self):
-        with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
+        conn = self.__connect()
+        with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             query = """SELECT urls.id, urls.name, urls.created_at,
                 max(url_checks.created_at) as last_check
                 FROM urls LEFT JOIN url_checks on url_checks.url_id = urls.id
@@ -82,9 +90,10 @@ class UrlsRepository:
         item_tuple = (new_id, url_id, status_code,
                       h1, title, description, current_date)
 
-        with self.conn.cursor() as curs:
+        conn = self.__connect()
+        with conn.cursor() as curs:
             curs.execute(insert_query, item_tuple)
-        self.conn.commit()
+        conn.commit()
         return True
 
     def find_checks(self, id=None, url=None):
@@ -96,7 +105,8 @@ class UrlsRepository:
             if url_item:
                 value = url_item.id
         if value:
-            with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
+            conn = self.__connect()
+            with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
                 request = "SELECT * from url_checks WHERE url_id=%s"
                 curs.execute(request, (value,))
                 result = curs.fetchall()

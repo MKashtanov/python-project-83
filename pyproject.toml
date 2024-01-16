@@ -9,7 +9,6 @@ packages = [{include = "page_analyzer"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 Flask = "^3.0.0"
-pip = "^23.3.2"
 python-dotenv = "^1.0.0"
 psycopg2-binary = "^2.9.9"
 validators = "^0.22.0"

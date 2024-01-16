@@ -1,14 +1,13 @@
 from flask import (
     Flask,
     flash,
-    get_flashed_messages,
     redirect,
     render_template,
     request,
     url_for,
 )
 from . repository import UrlsRepository
-from . validator import validate
+from . validator import validate, normalize_url
 from . checker import check_url
 import os
 from dotenv import load_dotenv
@@ -26,54 +25,50 @@ app.config['SECRET_KEY'] = SECRET_KEY
 @app.route('/')
 def index():
     url = {}
-    messages = get_flashed_messages(with_categories=True)
     return render_template(
         'index.html',
         url=url,
-        messages=messages,
     )
 
 
 @app.post('/urls')
 def add_url():
     data = request.form.to_dict()
-    error, url = validate(data.get('url'))
+    url = data.get('url')
+    error = validate(url)
     if error:
         flash('Некорректный URL', 'danger')
-        messages = get_flashed_messages(with_categories=True)
         return render_template(
             'index.html',
             url=url,
-            messages=messages,
         ), 422
-    if not repo.find_urls(name=url):
-        repo.add_url(url)
+    normalized_url = normalize_url(url)
+    url_item = repo.find_one_url(name=normalized_url)
+    if not url_item:
+        url_item = repo.add_url(normalized_url)
         flash('Страница успешно добавлена', 'success')
     else:
         flash('Страница уже существует', 'info')
-    return redirect(url_for('urls'))
+    url_id = url_item.id
+    return redirect(url_for('url_view', id=url_id))
 
 
 @app.route('/urls')
 def urls():
-    messages = get_flashed_messages(with_categories=True)
     return render_template(
         'urls.html',
         url_items=repo.get_all_url(),
-        messages=messages,
     )
 
 
-@app.route('/urls/<id>')
+@app.route('/urls/<int:id>')
 def url_view(id):
-    messages = get_flashed_messages(with_categories=True)
     url_item = repo.find_one_url(id=id)
     checks = repo.find_checks(id=id)
     if url_item:
         return render_template(
             'url.html',
             url_item=url_item,
-            messages=messages,
             checks=checks,
         )
     return render_template(
@@ -81,13 +76,14 @@ def url_view(id):
     ), 404
 
 
-@app.post('/urls/<id>/checks')
+@app.post('/urls/<int:id>/checks')
 def url_check(id):
     result = False
     url_item = repo.find_one_url(id=id)
     if url_item:
         url = url_item.name
         result_check = check_url(url)
+        print('url =', url, 'r_ch =', result_check)
         if result_check['result']:
             result = repo.add_check(url, result_check)
     if result:

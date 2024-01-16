@@ -152,14 +152,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "pip"
-version = "23.3.2"
-description = "The PyPA recommended tool for installing Python packages."
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[[package]]
 name = "psycopg2-binary"
 version = "2.9.9"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
@@ -282,7 +274,7 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "565b4bba462d44e50208106d21af2b92f27068287e4ab05aa709d594d1c2b304"
+content-hash = "e4df4845259d6fc0a090a15a586f716153cbae58ffb54839dc2011cc3a5802bd"
 
 [metadata.files]
 beautifulsoup4 = [
@@ -486,10 +478,6 @@ MarkupSafe = [
 mccabe = [
     {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
-]
-pip = [
-    {file = "pip-23.3.2-py3-none-any.whl", hash = "sha256:5052d7889c1f9d05224cd41741acb7c5d6fa735ab34e339624a614eaaa7e7d76"},
-    {file = "pip-23.3.2.tar.gz", hash = "sha256:7fd9972f96db22c8077a1ee2691b172c8089b17a5652a44494a9ecb0d78f9149"},
 ]
 psycopg2-binary = [
     {file = "psycopg2-binary-2.9.9.tar.gz", hash = "sha256:7f01846810177d829c7692f1f5ada8096762d9172af1b1a28d4ab5b77c923c1c"},
