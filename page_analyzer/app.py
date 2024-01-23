@@ -6,9 +6,9 @@ from flask import (
     request,
     url_for,
 )
-from . repository import UrlsRepository
-from . validator import validate, normalize_url
-from . checker import check_url
+from page_analyzer.repository import UrlsRepository
+from page_analyzer.validator import validate, normalize_url
+from page_analyzer.checker import check_url
 import os
 from dotenv import load_dotenv
 
@@ -43,9 +43,8 @@ def add_url():
             url=url,
         ), 422
     normalized_url = normalize_url(url)
-    url_item = repo.find_one_url(name=normalized_url)
-    if not url_item:
-        url_item = repo.add_url(normalized_url)
+    url_item, result_add = repo.add_url(normalized_url)
+    if result_add:
         flash('Страница успешно добавлена', 'success')
     else:
         flash('Страница уже существует', 'info')
@@ -63,8 +62,8 @@ def urls():
 
 @app.route('/urls/<int:id>')
 def url_view(id):
-    url_item = repo.find_one_url(id=id)
-    checks = repo.find_checks(id=id)
+    url_item = repo.find_one_url_by_id(id)
+    checks = repo.find_checks_by_id(id)
     if url_item:
         return render_template(
             'url.html',
@@ -79,11 +78,10 @@ def url_view(id):
 @app.post('/urls/<int:id>/checks')
 def url_check(id):
     result = False
-    url_item = repo.find_one_url(id=id)
+    url_item = repo.find_one_url_by_id(id)
     if url_item:
         url = url_item.name
         result_check = check_url(url)
-        print('url =', url, 'r_ch =', result_check)
         if result_check['result']:
             result = repo.add_check(url, result_check)
     if result:

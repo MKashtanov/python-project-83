@@ -18,3 +18,7 @@ def normalize_url(url):
     netloc = parsed_url.netloc
     result_url = urlunparse([scheme, netloc, '', '', '', ''])
     return result_url
+
+
+def crop_str(str, len_):
+    return str if len(str) <= len_ else f"{str[:len_ - 3]}..."
