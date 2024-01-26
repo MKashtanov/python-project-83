@@ -1,7 +1,6 @@
 import datetime
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
-from page_analyzer.validator import crop_str
 
 
 class UrlsRepository:
@@ -42,13 +41,12 @@ class UrlsRepository:
         result = self.find_one_url_by_name(url, conn)
         return result, True
 
-    def find_urls_by_id(self, id, conn=None):
+    def find_url_by_id(self, id, conn=None):
         conn = self.__connect(conn)
-        result = None
-        value = str(id)
-        if value:
-            query = "SELECT * from urls WHERE id=%s"
-            result = self.__do_select(query, (value,), conn)
+        query = "SELECT * from urls WHERE id=%s"
+        result = self.__do_select(query, (id,), conn)
+        if result:
+            result = result[0]
         return result
 
     def find_urls_by_name(self, name, conn=None):
@@ -58,12 +56,6 @@ class UrlsRepository:
         if value:
             query = "SELECT * from urls WHERE name=%s"
             result = self.__do_select(query, (value,), conn)
-        return result
-
-    def find_one_url_by_id(self, id, conn=None):
-        result = self.find_urls_by_id(id, conn)
-        if result:
-            result = result[0]
         return result
 
     def find_one_url_by_name(self, name, conn=None):
@@ -85,30 +77,25 @@ class UrlsRepository:
 
     def add_check(self, url, result_check, conn=None):
         conn = self.__connect(conn)
-        current_date = datetime.datetime.now()
         url_item = self.find_one_url_by_name(url, conn)
         if url_item:
             url_id = url_item.id
         else:
             return False
-        status_code = result_check['status_code']
-        h1 = result_check['h1']
-        title = result_check['title'][:110]
-        description = crop_str(result_check['description'], 160)
         query = """INSERT INTO url_checks
-            (url_id, status_code, h1, title, description, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s);"""
-        item_tuple = (url_id, status_code,
-                      h1, title, description, current_date)
-
+            (url_id, status_code, h1, title, description)
+            VALUES (%s, %s, %s, %s, %s);"""
+        item_tuple = (url_id,
+                      result_check['status_code'],
+                      result_check['h1'],
+                      result_check['title'],
+                      result_check['description'],
+                      )
         self.__do_insert(query, item_tuple, conn)
         return True
 
-    def find_checks_by_id(self, id, conn=None):
+    def find_checks_by_url_id(self, id, conn=None):
         conn = self.__connect(conn)
-        result = None
-        value = str(id)
-        if value:
-            query = "SELECT * from url_checks WHERE url_id=%s"
-            result = self.__do_select(query, (value,), conn)
+        query = "SELECT * from url_checks WHERE url_id=%s"
+        result = self.__do_select(query, (id,), conn)
         return result

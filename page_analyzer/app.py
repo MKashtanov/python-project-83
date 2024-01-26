@@ -7,8 +7,8 @@ from flask import (
     url_for,
 )
 from page_analyzer.repository import UrlsRepository
-from page_analyzer.validator import validate, normalize_url
-from page_analyzer.checker import check_url
+from page_analyzer.validator import validate, normalize_url, crop_str
+from page_analyzer.seo_analyzer import get_seo_info
 import os
 from dotenv import load_dotenv
 
@@ -24,10 +24,8 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 @app.route('/')
 def index():
-    url = {}
     return render_template(
         'index.html',
-        url=url,
     )
 
 
@@ -49,11 +47,11 @@ def add_url():
     else:
         flash('Страница уже существует', 'info')
     url_id = url_item.id
-    return redirect(url_for('url_view', id=url_id))
+    return redirect(url_for('get_url_view', id=url_id))
 
 
 @app.route('/urls')
-def urls():
+def get_urls():
     return render_template(
         'urls.html',
         url_items=repo.get_all_url(),
@@ -61,31 +59,33 @@ def urls():
 
 
 @app.route('/urls/<int:id>')
-def url_view(id):
-    url_item = repo.find_one_url_by_id(id)
-    checks = repo.find_checks_by_id(id)
+def get_url_view(id):
+    url_item = repo.find_url_by_id(id)
+    checks = repo.find_checks_by_url_id(id)
     if url_item:
         return render_template(
             'url.html',
             url_item=url_item,
             checks=checks,
         )
-    return render_template(
-        'not_found.html',
-    ), 404
+    return render_template('404.html'), 404
 
 
 @app.post('/urls/<int:id>/checks')
-def url_check(id):
+def do_url_check(id):
     result = False
-    url_item = repo.find_one_url_by_id(id)
-    if url_item:
-        url = url_item.name
-        result_check = check_url(url)
-        if result_check['result']:
-            result = repo.add_check(url, result_check)
+    url_item = repo.find_url_by_id(id)
+    if not url_item:
+        return render_template('404.html'), 404
+
+    url = url_item.name
+    result_check = get_seo_info(url)
+    if result_check['result']:
+        result_check['title'] = crop_str(result_check['title'], 110)
+        result_check['description'] = crop_str(result_check['description'], 160)
+        result = repo.add_check(url, result_check)
     if result:
         flash('Страница успешно проверена', 'success')
     else:
         flash('Произошла ошибка при проверке', 'danger')
-    return redirect(url_for('url_view', id=id))
+    return redirect(url_for('get_url_view', id=id))
