@@ -20,5 +20,7 @@ def normalize_url(url):
     return result_url
 
 
-def crop_str(str, len_):
-    return str if len(str) <= len_ else f"{str[:len_ - 3]}..."
+def crop_str(str_, len_):
+    if isinstance(str_, str):
+        return str_ if len(str_) <= len_ else f"{str_[:len_ - 3]}..."
+    return str_

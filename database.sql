@@ -11,8 +11,8 @@ CREATE TABLE url_checks (
 	id BIGSERIAL PRIMARY KEY,
 	url_id bigint REFERENCES urls (id),
 	status_code int,
-	h1 varchar(70),
-	title varchar(110),
-	description varchar(160),
+	h1 varchar(255),
+	title varchar(255),
+	description varchar(255),
 	created_at date DEFAULT CURRENT_TIMESTAMP
 );

@@ -73,16 +73,17 @@ def get_url_view(id):
 
 @app.post('/urls/<int:id>/checks')
 def do_url_check(id):
-    result = False
     url_item = repo.find_url_by_id(id)
     if not url_item:
         return render_template('404.html'), 404
 
+    result = False
     url = url_item.name
     result_check = get_seo_info(url)
-    if result_check['result']:
-        result_check['title'] = crop_str(result_check['title'], 110)
-        result_check['description'] = crop_str(result_check['description'], 160)
+    if result_check['status_code'] == 200:
+        result_check['h1'] = crop_str(result_check.get('h1', ''), 255)
+        result_check['title'] = crop_str(result_check.get('title', ''), 255)
+        result_check['description'] = crop_str(result_check.get('description', ''), 255)
         result = repo.add_check(url, result_check)
     if result:
         flash('Страница успешно проверена', 'success')

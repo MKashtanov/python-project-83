@@ -29,7 +29,7 @@ class UrlsRepository:
 
     def add_url(self, url, conn=None):
         conn = self.__connect(conn)
-        result = self.find_one_url_by_name(url, conn)
+        result = self.find_url_by_name(url, conn)
         if result:
             return result, False
 
@@ -38,7 +38,7 @@ class UrlsRepository:
             VALUES (%s, %s);"""
         item_tuple = (url, current_date)
         self.__do_insert(query, item_tuple, conn)
-        result = self.find_one_url_by_name(url, conn)
+        result = self.find_url_by_name(url, conn)
         return result, True
 
     def find_url_by_id(self, id, conn=None):
@@ -49,17 +49,13 @@ class UrlsRepository:
             result = result[0]
         return result
 
-    def find_urls_by_name(self, name, conn=None):
+    def find_url_by_name(self, name, conn=None):
         conn = self.__connect(conn)
         result = None
         value = str(name)
         if value:
             query = "SELECT * from urls WHERE name=%s"
             result = self.__do_select(query, (value,), conn)
-        return result
-
-    def find_one_url_by_name(self, name, conn=None):
-        result = self.find_urls_by_name(name, conn)
         if result:
             result = result[0]
         return result
@@ -75,9 +71,9 @@ class UrlsRepository:
         result = self.__do_select(query, conn=conn)
         return result
 
-    def add_check(self, url, result_check, conn=None):
+    def add_check(self, url, seo_info, conn=None):
         conn = self.__connect(conn)
-        url_item = self.find_one_url_by_name(url, conn)
+        url_item = self.find_url_by_name(url, conn)
         if url_item:
             url_id = url_item.id
         else:
@@ -86,10 +82,10 @@ class UrlsRepository:
             (url_id, status_code, h1, title, description)
             VALUES (%s, %s, %s, %s, %s);"""
         item_tuple = (url_id,
-                      result_check['status_code'],
-                      result_check['h1'],
-                      result_check['title'],
-                      result_check['description'],
+                      seo_info['status_code'],
+                      seo_info['h1'],
+                      seo_info['title'],
+                      seo_info['description'],
                       )
         self.__do_insert(query, item_tuple, conn)
         return True
